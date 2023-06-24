@@ -1,10 +1,14 @@
 from django.shortcuts import render
+from django.contrib.auth import authenticate, login, logout
+from django.db import IntegrityError
 from .models import *
 from django.http import JsonResponse
 import json
 import datetime
 from . utils import cookieCart, cartData, guestOrder
-
+from django.http import HttpResponse, HttpResponseRedirect
+from django.urls import reverse
+from django.contrib.auth.decorators import login_required
 
 def store(request):
 	data = cartData(request)
@@ -21,6 +25,78 @@ def cart(request):
 	context={"items": items, "order": order, "cartItems": cartItems, 'shipping':False}
 	return render(request, 'store/cart.html', context )
 
+
+def login_view(request):
+    if request.method == "POST":
+        # Attempt to sign user in
+        username = request.POST["username"]
+        password = request.POST["password"]
+        user = authenticate(request, username=username, password=password)
+
+        # Check if authentication successful
+        if user is not None:
+            login(request, user)
+            return HttpResponseRedirect(reverse("store"))
+        else:
+            return render(request, "store/login.html", {
+                "message": "Invalid username and/or password."
+            })
+    else:
+        return render(request, "store/login.html")
+
+
+def logout_view(request):
+    logout(request)
+    return HttpResponseRedirect(reverse("store"))
+
+def register(request):
+    if request.method == "POST":
+        username = request.POST["username"]
+        email = request.POST["email"]
+
+        # Ensure password matches confirmation
+        password = request.POST["password"]
+        confirmation = request.POST["confirmation"]
+        if password != confirmation:
+            return render(request, "store/register.html", {
+                "message": "Passwords must match."
+            })
+
+        # Attempt to create new user
+        try:
+            user = User.objects.create_user(username, email, password)
+            user.save()
+            regCustomer, created = Customer.objects.get_or_create(user= user, name=request.POST["username"],email = request.POST["email"] )
+            regCustomer.save()
+        except IntegrityError:
+            return render(request, "store/register.html", {
+                "message": "Username already taken."
+            })
+        login(request, user)
+        return HttpResponseRedirect(reverse("store"))
+    else:
+        return render(request, "store/register.html")
+
+		    
+	    
+		    
+	        
+        
+       
+    
+# 
+# #  # Attempt to create new user
+#         try:
+#             user = User.objects.create_user(username, email, password)
+#             #  make user also customer # new line added
+# 	        regCustomer, created = Customer.objects.get_or_create(user= user, name=request.POST["username"],email = request.POST["email"] )
+#             regCustomer.save()
+# 		except IntegrityError:
+#             return render(request, "store/register.html", {
+#                 "message": "Username already taken."
+#             })
+#         login(request, regCustomer,)
+#         return HttpResponseRedirect(reverse("store"))
 
 
 

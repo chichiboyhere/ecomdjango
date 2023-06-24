@@ -1,0 +1,40 @@
+{% extends "store/main.html" %}
+
+{% block content %}
+
+   
+<div class="col-lg-6" style="margin: auto;">
+    <div class="box-element" id="form-wrapper" style="background-color:rgb(243, 249, 247)">
+        {% if message %}
+        <div class="alert alert-danger"  style="display: flex; justify-content: center; align-items: center;">{{ message }}</div>
+        {% endif %} 
+        <h1 style="text-align: center; padding: 20px;">Register</h1>
+
+        <form id="form" action="{% url 'register' %}" method="post" style="padding-bottom: 15px;">
+            {% csrf_token %}
+            <div id="user-info">
+                <div class="form-field">
+                    <input required class="form-control" type="text" name="username" placeholder="Name..." >
+                </div>
+                <div class="form-field">
+                    <input required class="form-control" type="email" name="email" placeholder="Email...">
+                </div>
+            </div>
+            <div id="user-info">
+                <div class="form-field">
+                    <input required class="form-control" type="password" name="password" placeholder="Password..." >
+                </div>
+                <div class="form-field">
+                    <input required class="form-control" type="password" name="confirmation" placeholder="Confirm Password...">
+                </div>
+            </div>
+
+            <hr>
+            <input id="form-button" class="btn btn-success btn-block" type="submit" value="Register">
+        </form>
+    </div>
+    <div class="box-element" style="margin-top: 16px; display: flex; justify-content: center; align-items: center; padding: 20px;">
+        Already have an account? <a href="{% url 'login' %}"> &nbsp; Log In here.</a>
+    </div>
+</div>
+{% endblock %}
